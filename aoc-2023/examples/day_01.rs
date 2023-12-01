@@ -35,57 +35,89 @@ fn parse_line(line: &str) -> u32 {
 }
 
 fn parse_line_2(line: &str) -> u32 {
-    let mapper = {
-        let mut map = HashMap::with_capacity(20);
-        map.insert("one", 1u32);
-        map.insert("two", 2);
-        map.insert("three", 3);
-        map.insert("four", 4);
-        map.insert("five", 5);
-        map.insert("six", 6);
-        map.insert("seven", 7);
-        map.insert("eight", 8);
-        map.insert("nine", 9);
-        map.insert("1", 1);
-        map.insert("2", 2);
-        map.insert("3", 3);
-        map.insert("4", 4);
-        map.insert("5", 5);
-        map.insert("6", 6);
-        map.insert("7", 7);
-        map.insert("8", 8);
-        map.insert("9", 9);
-        map
-    };
+    let mapper: HashMap<&str, u32> = HashMap::from_iter([
+        ("one", 1u32),
+        ("two", 2),
+        ("three", 3),
+        ("four", 4),
+        ("five", 5),
+        ("six", 6),
+        ("seven", 7),
+        ("eight", 8),
+        ("nine", 9),
+        ("1", 1),
+        ("2", 2),
+        ("3", 3),
+        ("4", 4),
+        ("5", 5),
+        ("6", 6),
+        ("7", 7),
+        ("8", 8),
+        ("9", 9),
+    ]);
 
-    let (a, b) = line
+    let min = line
         .match_indices("one")
-        .chain(line.match_indices("two"))
-        .chain(line.match_indices("three"))
-        .chain(line.match_indices("four"))
-        .chain(line.match_indices("five"))
-        .chain(line.match_indices("six"))
-        .chain(line.match_indices("seven"))
-        .chain(line.match_indices("eight"))
-        .chain(line.match_indices("nine"))
-        .chain(line.match_indices(|c: char| c.is_ascii_digit()))
-        .fold((None, None), |(a, b), x| {
-            (
-                if a.is_some() && a < Some(x) {
-                    a
-                } else {
-                    Some(x)
-                },
-                if b.is_some() && b > Some(x) {
-                    b
-                } else {
-                    Some(x)
-                },
-            )
-        });
+        .take(1)
+        .chain(line.match_indices("two").take(1))
+        .chain(line.match_indices("three").take(1))
+        .chain(line.match_indices("four").take(1))
+        .chain(line.match_indices("five").take(1))
+        .chain(line.match_indices("six").take(1))
+        .chain(line.match_indices("seven").take(1))
+        .chain(line.match_indices("eight").take(1))
+        .chain(line.match_indices("nine").take(1))
+        .chain(line.match_indices(|c: char| c.is_ascii_digit()).take(1))
+        .min_by_key(|x| x.0)
+        .unwrap()
+        .1;
 
-    let a = mapper[a.unwrap().1];
-    let b = mapper[b.unwrap().1];
+    let max = line
+        .rmatch_indices("one")
+        .take(1)
+        .chain(line.rmatch_indices("two").take(1))
+        .chain(line.rmatch_indices("three").take(1))
+        .chain(line.rmatch_indices("four").take(1))
+        .chain(line.rmatch_indices("five").take(1))
+        .chain(line.rmatch_indices("six").take(1))
+        .chain(line.rmatch_indices("seven").take(1))
+        .chain(line.rmatch_indices("eight").take(1))
+        .chain(line.rmatch_indices("nine").take(1))
+        .chain(line.rmatch_indices(|c: char| c.is_ascii_digit()).take(1))
+        .max_by_key(|x| x.0)
+        .unwrap()
+        .1;
+
+    // let (a, b) = line
+    //     .match_indices("one")
+    //     .chain(line.match_indices("two"))
+    //     .chain(line.match_indices("three"))
+    //     .chain(line.match_indices("four"))
+    //     .chain(line.match_indices("five"))
+    //     .chain(line.match_indices("six"))
+    //     .chain(line.match_indices("seven"))
+    //     .chain(line.match_indices("eight"))
+    //     .chain(line.match_indices("nine"))
+    //     .chain(line.match_indices(|c: char| c.is_ascii_digit()))
+    //     .fold((None, None), |(a, b), x| {
+    //         (
+    //             if a.is_some() && a < Some(x) {
+    //                 a
+    //             } else {
+    //                 Some(x)
+    //             },
+    //             if b.is_some() && b > Some(x) {
+    //                 b
+    //             } else {
+    //                 Some(x)
+    //             },
+    //         )
+    //     });
+
+    // let a = mapper[a.unwrap().1];
+    // let b = mapper[b.unwrap().1];
+    let a = mapper[min];
+    let b = mapper[max];
 
     a * 10 + b
 }
