@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
 pub fn main() {
-    let input = include_str!("../input/day_01.txt");
+    let input = include_str!("../input/day_01_big.txt");
     let a1 = exercise_1(input);
-    let a2 = exercise_2(input);
     println!("Ex1: {}", a1);
+    let a2 = exercise_2(input);
     println!("Ex2: {}", a2);
 }
 
@@ -46,7 +46,6 @@ fn parse_line_2(line: &str) -> u32 {
         map.insert("seven", 7);
         map.insert("eight", 8);
         map.insert("nine", 9);
-        map.insert("zero", 0);
         map.insert("1", 1);
         map.insert("2", 2);
         map.insert("3", 3);
@@ -56,11 +55,10 @@ fn parse_line_2(line: &str) -> u32 {
         map.insert("7", 7);
         map.insert("8", 8);
         map.insert("9", 9);
-        map.insert("0", 0);
         map
     };
 
-    let l = line
+    let (a, b) = line
         .match_indices("one")
         .chain(line.match_indices("two"))
         .chain(line.match_indices("three"))
@@ -70,21 +68,24 @@ fn parse_line_2(line: &str) -> u32 {
         .chain(line.match_indices("seven"))
         .chain(line.match_indices("eight"))
         .chain(line.match_indices("nine"))
-        .chain(line.match_indices("zero"))
-        .chain(line.match_indices("1"))
-        .chain(line.match_indices("2"))
-        .chain(line.match_indices("3"))
-        .chain(line.match_indices("4"))
-        .chain(line.match_indices("5"))
-        .chain(line.match_indices("6"))
-        .chain(line.match_indices("7"))
-        .chain(line.match_indices("8"))
-        .chain(line.match_indices("9"))
-        .chain(line.match_indices("0"))
-        .collect::<Vec<_>>();
+        .chain(line.match_indices(|c: char| c.is_ascii_digit()))
+        .fold((None, None), |(a, b), x| {
+            (
+                if a.is_some() && a < Some(x) {
+                    a
+                } else {
+                    Some(x)
+                },
+                if b.is_some() && b > Some(x) {
+                    b
+                } else {
+                    Some(x)
+                },
+            )
+        });
 
-    let a = mapper[l.iter().min_by_key(|x| x.0).unwrap().1];
-    let b = mapper[l.iter().max_by_key(|x| x.0).unwrap().1];
+    let a = mapper[a.unwrap().1];
+    let b = mapper[b.unwrap().1];
 
     a * 10 + b
 }
