@@ -1,0 +1,11 @@
+[package]
+name = "advent-of-code-2018"
+version = "0.1.0"
+authors = ["BlockCat <zinoonomiwo@gmail.com>"]
+edition = "2018"
+rustflags = ["-C target-cpu=native"]
+
+[dependencies]
+hashbrown = "0.1.7"
+rayon = "1.0.3"
+ocl="0.19.1"

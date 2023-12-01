@@ -1,0 +1,3 @@
+shiny gold bags contain 2 pure red bags, 2 pure yellow bags.
+pure red bags contain 2 pure yellow bags.
+pure yellow bags contain no other.

@@ -1,0 +1,8 @@
+[package]
+name = "aoc-2015"
+version = "0.1.0"
+authors = ["BlockCat <zinoonomiwo@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+md5 = "0.6.0"

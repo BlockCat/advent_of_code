@@ -1,0 +1,4 @@
+/target
+**/*.rs.bk
+**/*_big.txt
+day5bigboi.txt

@@ -1,0 +1,13 @@
+[package]
+name = "aoc-2021"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+nalgebra = "0.29.0"
+rayon = "1.5.1"
+dashmap = "5.0.0"
+num-bigint = "0.4.3"
+num-traits = "0.2.11"

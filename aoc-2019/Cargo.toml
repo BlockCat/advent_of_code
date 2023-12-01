@@ -1,0 +1,15 @@
+[package]
+name = "aoc2019"
+version = "0.1.0"
+authors = ["BlockCat <zinoonomiwo@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+itertools = "0.8.2"
+hashbrown = "0.6.3"
+packed_simd = "0.3.3"
+permutohedron = "0.2.4"
+
+[lib]
+name = "utils"
+path = "src/lib.rs"
