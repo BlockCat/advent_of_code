@@ -172,6 +172,13 @@ where
             y: 0,
         }
     }
+
+    pub fn get_neighbours_8(&self, pos: &Vector2) -> Vec<(Vector2, &T)> {
+        pos.neighbours()
+            .into_iter()
+            .filter_map(|s| self.get_vec(&s).map(|v| (s, v)))
+            .collect()
+    }
 }
 
 pub struct GridIterator<'a, T>
