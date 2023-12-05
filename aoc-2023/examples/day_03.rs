@@ -4,7 +4,7 @@ use std::collections::HashMap;
 type InputType = StaticGrid<Option<Entry>>;
 
 pub fn main() {
-    let input = parse(include_str!("../input/day_03.txt"));
+    let input = parse(include_str!("../input/day_03_big.txt"));
     println!("Exercise 1: {}", exercise_1(input.clone()));
     println!("Exercise 2: {}", exercise_2(input));
 }
