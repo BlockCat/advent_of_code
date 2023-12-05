@@ -1,21 +1,7 @@
-use std::collections::HashMap;
-
 use rayon::prelude::{IntoParallelIterator, ParallelBridge, ParallelIterator};
 
-const ORDER: [&'static str; 8] = [
-    "seed",
-    "soil",
-    "fertilizer",
-    "water",
-    "light",
-    "temperature",
-    "humidity",
-    "location",
-];
-
 pub fn main() {
-    let input = parse(include_str!("../input/day_05.txt"));
-    println!("parsed");
+    let input = parse(include_str!("../input/day_05_big.txt"));
     println!("Exercise 1: {}", exercise_1(&input));
     println!("Exercise 2: {}", exercise_2(&input));
 }
@@ -28,62 +14,45 @@ fn parse<'a>(input: &'a str) -> InputType {
         .map(|s| (s).parse::<usize>().unwrap())
         .collect::<Vec<_>>();
 
-    let mut entry = HashMap::new();
+    let mut category = Vec::new();
 
-    lines.next();
+    let mut lines = lines.skip(1);
 
-    while let Some(category) = lines.next() {
-        let mut ce = Vec::new();
-        let category = category.replace(" map:", "");
-        let (from, to) = category.split_once("-to-").unwrap();
-
-        while let Some(line) = lines.next() {
-            if line.is_empty() {
-                break;
-            }
-            let numbers = line
-                .split_whitespace()
-                .map(|s| s.parse::<usize>().unwrap())
-                .collect::<Vec<_>>();
-            ce.push(Mapping {
+    while let Some(_) = lines.next() {
+        let mut ce = lines
+            .by_ref()
+            .take_while(|s| !s.is_empty())
+            .map(|line| {
+                line.split_whitespace()
+                    .take(3)
+                    .map(|s| s.parse::<usize>().expect("Could not parse"))
+                    .collect::<Vec<usize>>()
+            })
+            .map(|numbers| Mapping {
                 source: numbers[1],
                 offset: numbers[0] as isize - numbers[1] as isize,
                 range: numbers[2],
-            });
-        }
+            })
+            .collect::<Vec<_>>();
 
         ce.sort_by_key(|s| s.source);
 
-        entry.insert((from.to_string(), to.to_string()), ce);
+        category.push(ce);
     }
 
-    InputType {
-        seeds,
-        category: entry,
-    }
+    InputType { seeds, category }
 }
 
 fn exercise_1(input: &InputType) -> usize {
     input
         .seeds
         .iter()
-        .map(|seed| {
-            ORDER.windows(2).fold(*seed, |acc, x| {
-                map_to_target(&input.category, x[0], x[1], acc)
-            })
-        })
+        .map(|seed| input.category.iter().fold(*seed, map_to_target))
         .min()
         .unwrap()
 }
 
-fn map_to_target(
-    categories: &HashMap<(String, String), Vec<Mapping>>,
-    from: &str,
-    to: &str,
-    number: usize,
-) -> usize {
-    let mappings: &Vec<Mapping> = &categories[&(from.to_string(), to.to_string())];
-
+fn map_to_target(number: usize, mappings: &Vec<Mapping>) -> usize {
     mappings
         .iter()
         .find(|m| m.contains(number))
@@ -102,16 +71,11 @@ fn exercise_2(input: &InputType) -> usize {
             offset: 0,
         })
         .map(|mapping| {
-            ORDER
-                .windows(2)
-                .fold(vec![mapping], |mut acc, transformation| {
-                    let from = transformation[0].to_string();
-                    let to = transformation[1].to_string();
+            input
+                .category
+                .iter()
+                .fold(vec![mapping], |mut acc, mappings| {
                     acc.sort_by_key(|s| s.source);
-                    let mappings = input
-                        .category
-                        .get(&(from.to_string(), to.to_string()))
-                        .unwrap();
                     acc.into_par_iter()
                         .flat_map(|map| overlapping(map, mappings))
                         .collect()
@@ -133,13 +97,11 @@ fn overlapping(base_mapping: Mapping, mappings: &Vec<Mapping>) -> Vec<Mapping> {
 
     let mut last_range = 0;
 
-    for mapping in mappings {
-        if mapping.end() < low {
-            continue;
-        }
-        if mapping.start() >= up {
-            break;
-        }
+    for mapping in mappings
+        .iter()
+        .skip_while(|mapping| mapping.end() < low)
+        .take_while(|mapping| mapping.start() < up)
+    {
         if mapping.source >= last_range {
             if let Some(overlap) = get_overlap(
                 low,
@@ -188,7 +150,7 @@ fn get_overlap(low: usize, up: usize, mapping: Mapping) -> Option<Mapping> {
 
 struct InputType {
     seeds: Vec<usize>,
-    category: HashMap<(String, String), Vec<Mapping>>,
+    category: Vec<Vec<Mapping>>,
 }
 
 #[derive(Debug, Clone)]
