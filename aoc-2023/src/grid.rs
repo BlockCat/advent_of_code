@@ -1,8 +1,5 @@
-use std::collections::HashMap;
-
-use rayon::prelude::ParallelIterator;
-
 use crate::vector::Vector2;
+use std::collections::HashMap;
 
 pub trait Grid<T>
 where
