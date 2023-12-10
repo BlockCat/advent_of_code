@@ -1,3 +1,4 @@
+use aoc_2023::lcm;
 use rayon::prelude::{ParallelBridge, ParallelIterator};
 use std::collections::HashMap;
 
@@ -112,16 +113,4 @@ fn exercise_2((lr, input): InputType) -> usize {
                 .unwrap()
         })
         .reduce(|| 1, |acc, x| lcm(acc, x))
-}
-
-fn lcm(a: usize, b: usize) -> usize {
-    (a * b) / gcd(a, b)
-}
-
-fn gcd(a: usize, b: usize) -> usize {
-    if b == 0 {
-        return a;
-    }
-
-    gcd(b, a % b)
 }

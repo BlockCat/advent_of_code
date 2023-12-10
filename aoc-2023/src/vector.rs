@@ -58,6 +58,15 @@ impl Vector2 {
             *self + Vector2::new([1, 1]),
         ]
     }
+
+    pub fn neighbours_4(&self) -> [Vector2; 4] {
+        [
+            *self + Vector2::new([-1, 0]),
+            *self + Vector2::new([0, -1]),
+            *self + Vector2::new([0, 1]),
+            *self + Vector2::new([1, 0]),
+        ]
+    }
 }
 
 impl<const N: usize> Index<usize> for VectorN<N> {
