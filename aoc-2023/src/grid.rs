@@ -176,6 +176,15 @@ where
             .filter_map(|s| self.get_vec(&s).map(|v| (s, v)))
             .collect()
     }
+
+    pub fn pretty_print<R>(&self, mapper: R) where R: Fn(&T) -> char {
+        for y in 0..self.height {
+            for x in 0..self.width {
+                print!("{}", mapper(self.get(x as isize, y as isize).unwrap()));
+            }
+            println!();
+        }
+    }
 }
 
 pub struct GridIterator<'a, T>
@@ -212,3 +221,8 @@ where
         }
     }
 }
+
+
+// TODO: A function that makes a path from a grid
+// TODO: A function that calculates the shortest path between one and many points
+// TODO: A function that calculates enclosed stuff
