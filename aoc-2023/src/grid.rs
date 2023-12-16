@@ -82,8 +82,8 @@ where
     pub height: usize,
 }
 
-unsafe impl Send for StaticGrid<usize> {}
-unsafe impl Sync for StaticGrid<usize> {}
+unsafe impl<T> Send for StaticGrid<T> where T: Send + Sync + Clone + Eq + Default {}
+unsafe impl<T> Sync for StaticGrid<T> where T: Send + Sync + Clone + Eq + Default {}
 
 impl<T> Grid<T> for StaticGrid<T>
 where
@@ -177,10 +177,19 @@ where
             .collect()
     }
 
-    pub fn pretty_print<R>(&self, mapper: R) where R: Fn(&T) -> char {
+    pub fn pretty_print<R>(&self, mapper: R)
+    where
+        R: Fn(&T, Vector2) -> char,
+    {
         for y in 0..self.height {
             for x in 0..self.width {
-                print!("{}", mapper(self.get(x as isize, y as isize).unwrap()));
+                print!(
+                    "{}",
+                    mapper(
+                        self.get(x as isize, y as isize).unwrap(),
+                        Vector2::new([x as isize, y as isize])
+                    )
+                );
             }
             println!();
         }
@@ -221,7 +230,6 @@ where
         }
     }
 }
-
 
 // TODO: A function that makes a path from a grid
 // TODO: A function that calculates the shortest path between one and many points
