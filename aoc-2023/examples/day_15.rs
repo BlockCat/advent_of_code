@@ -1,5 +1,3 @@
-use std::collections::{HashMap, HashSet};
-
 type InputType = Vec<String>;
 
 pub fn main() {

@@ -1,7 +1,4 @@
-use std::{
-    collections::{HashMap, VecDeque},
-    str::FromStr,
-};
+use std::collections::{HashMap, VecDeque};
 
 use aoc_2023::{
     direction::Direction,

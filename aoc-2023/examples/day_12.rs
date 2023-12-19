@@ -1,4 +1,4 @@
-use std::{collections::HashMap, hash::Hash};
+use std::collections::HashMap;
 
 type InputType = Vec<(Vec<Status>, Vec<usize>)>;
 

@@ -2,7 +2,7 @@ use aoc_2023::{
     grid::{Grid, StaticGrid},
     vector::Vector2,
 };
-use std::collections::{HashMap, VecDeque};
+use std::collections::HashMap;
 
 type InputType = StaticGrid<char>;
 
@@ -144,7 +144,8 @@ fn exercise_2(input: InputType) -> usize {
                 _ => {}
             }
         }
-    }    counter
+    }
+    counter
 }
 
 fn translate_s(input: &InputType) -> (char, Vector2) {
