@@ -10,3 +10,4 @@ num-bigint = "0.4.3"
 num-traits = "0.2.15"
 rayon = "1.6.0"
 dashmap = "5.4.0"
+# z3 = { version = "0.12.1", features = ["static-link-z3"] }
