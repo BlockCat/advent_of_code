@@ -4,7 +4,7 @@ use rayon::iter::{ParallelBridge, ParallelIterator};
 type Input = Vec<Vec<char>>;
 
 pub fn main() {
-    let input = include_str!("../input/day_04.txt");
+    let input = include_str!("../input/bigboi4.txt");
 
     let l = stopwatch(|| {
         let input = parse(input);
@@ -44,45 +44,48 @@ fn exercise_2(input: &Input) -> usize {
         .sum()
 }
 
+const DIRS: [(isize, isize); 8] = [
+    (-1, -1),
+    (-1, 0),
+    (-1, 1),
+    (0, -1),
+    (0, 1),
+    (1, -1),
+    (1, 0),
+    (1, 1),
+];
+
 fn count_from(input: &Input, x: usize, y: usize) -> usize {
-    [
-        (-1, -1),
-        (-1, 0),
-        (-1, 1),
-        (0, -1),
-        (0, 1),
-        (1, -1),
-        (1, 0),
-        (1, 1),
-    ]
-    .into_iter()
-    .filter(|(i, j)| {
-        (0..4)
-            .filter_map(|index| {
-                let x = x as isize + i * index;
-                let y = y as isize + j * index;
-                if x < 0 || y < 0 {
-                    return None;
-                }
-                input
-                    .get(x as usize)
-                    .and_then(|x| x.get(y as usize))
-                    .copied()
-            })
-            .eq(['X', 'M', 'A', 'S'])
-    })
-    .count()
+    DIRS.into_iter()
+        .filter(|(i, j)| {
+            let x2 = x as isize + i * 3;
+            let y2 = y as isize + j * 3;
+            let len = input.len() as isize;
+            x2 >= 0
+                && y2 >= 0
+                && x2 < len
+                && y2 < len
+                && (0..4)
+                    .map(|index| {
+                        let x = x as isize + i * index;
+                        let y = y as isize + j * index;
+                        input[x as usize][y as usize]
+                    })
+                    .eq(['X', 'M', 'A', 'S'])
+        })
+        .count()
 }
 
 fn has_x(input: &Input, x: usize, y: usize) -> bool {
     if input[x][y] != 'A' {
         return false;
     }
-    let diag_1 = [input[x - 1][y - 1], input[x][y], input[x + 1][y + 1]];
-    let diag_2 = [input[x - 1][y + 1], input[x][y], input[x + 1][y - 1]];
 
-    let bool_1 = diag_1 == ['M', 'A', 'S'] || diag_1 == ['S', 'A', 'M'];
-    let bool_2 = diag_2 == ['M', 'A', 'S'] || diag_2 == ['S', 'A', 'M'];
+    let diag_1 = [input[x - 1][y - 1], input[x + 1][y + 1]];
+    let diag_2 = [input[x - 1][y + 1], input[x + 1][y - 1]];
+
+    let bool_1 = diag_1 == ['M', 'S'] || diag_1 == ['S', 'M'];
+    let bool_2 = diag_2 == ['M', 'S'] || diag_2 == ['S', 'M'];
 
     bool_1 && bool_2
 }

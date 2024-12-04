@@ -3,10 +3,10 @@ use aoc_2024::stopwatch;
 type Input = Vec<Instruction>;
 
 pub fn main() {
-    let input = include_str!("../input/day_03.txt");
+    let input = include_str!("../input/bigboi3.txt");
 
     let l = stopwatch(|| {
-        let input = parse(input);
+        let input = parse_line(input);
 
         let a1 = exercise_1(&input);
         println!("Ex1: {}", a1);
@@ -15,10 +15,6 @@ pub fn main() {
     });
 
     println!("Time: {:?}", l);
-}
-
-fn parse(input: &str) -> Input {
-    input.lines().map(parse_line).flatten().collect()
 }
 
 fn parse_line(input: &str) -> Vec<Instruction> {
