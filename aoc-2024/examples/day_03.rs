@@ -3,7 +3,7 @@ use aoc_2024::stopwatch;
 type Input = Vec<Instruction>;
 
 pub fn main() {
-    let input = include_str!("../input/bigboi3.txt");
+    let input = include_str!("../input/day_03.txt");
 
     let l = stopwatch(|| {
         let input = parse_line(input);

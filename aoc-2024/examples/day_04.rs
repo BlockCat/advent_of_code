@@ -4,7 +4,7 @@ use rayon::iter::{ParallelBridge, ParallelIterator};
 type Input = Vec<Vec<char>>;
 
 pub fn main() {
-    let input = include_str!("../input/bigboi4.txt");
+    let input = include_str!("../input/day_04.txt");
 
     let l = stopwatch(|| {
         let input = parse(input);
