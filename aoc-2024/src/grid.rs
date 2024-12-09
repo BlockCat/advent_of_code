@@ -194,6 +194,10 @@ where
             println!();
         }
     }
+    
+    pub fn in_bounds(&self, pos: Vector2) -> bool {
+        pos[0] >= 0 && pos[1] >= 0 && pos[0] < self.width as isize && pos[1] < self.height as isize
+    }
 }
 
 pub struct GridIterator<'a, T>
