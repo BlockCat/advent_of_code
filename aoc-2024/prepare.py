@@ -1,13 +1,13 @@
 import requests
 import os
 import sys
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from os.path import exists
 from datetime import datetime, time
 
-load_dotenv()
+# load_dotenv()
 
-year = 2023
+year = 2024
 
 if len(sys.argv) > 1:
     day = sys.argv[1]
@@ -27,14 +27,14 @@ if not exists(example_path):
     rust = '''type InputType = Vec<u32>;
 
 pub fn main() {
-    let numbers = input();
+    let numbers = input(include_str!("../input/day_{day}.txt"));
 
     // println!("Exercise 1: {}", exercise_1(numbers.clone()));
     // println!("Exercise 2: {}", exercise_2(numbers));
 }
 
-fn input() -> InputType {
-    include_str!("../input/day_{day}.txt").lines().map(parse_line).collect()
+fn input(input: &str) -> InputType {
+    input.lines().map(parse_line).collect()
 }
 
 fn parse_line(line: &str) -> usize {
@@ -52,12 +52,12 @@ fn exercise_2(input: InputType) -> usize {
 
 
 if not exists(input_path):
-    cookies = {'session': os.environ["COOKIE"]}
-    headers = {'User-Agent': 'https://github.com/BlockCat/advent_of_code_2024 by BlockCat'}
-    response = requests.get(url = url, cookies=cookies, headers=headers)
+    # cookies = {'session': os.environ["COOKIE"]}
+    # headers = {'User-Agent': 'https://github.com/BlockCat/advent_of_code_2024 by BlockCat'}
+    # response = requests.get(url = url, cookies=cookies, headers=headers)
 
-    if not response.text.__contains__("Please don't repeatedly request this endpoint before it unlocks! The calendar countdown is synchronized with the server "):
-        print('created:' + input_path)
-        file = open(input_path, 'x')
-        file.write(response.text)
-        file.close()
+    # if not response.text.__contains__("Please don't repeatedly request this endpoint before it unlocks! The calendar countdown is synchronized with the server "):
+    print('created:' + input_path)
+    file = open(input_path, 'x')
+    file.write(response.text)
+    file.close()
