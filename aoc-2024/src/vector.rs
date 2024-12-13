@@ -33,6 +33,14 @@ impl<const N: usize> VectorN<N> {
         d
     }
 
+    pub fn dot(&self, o: &Self) -> isize {
+        self.value
+            .iter()
+            .zip(o.value.iter())
+            .map(|x| x.0 * x.1)
+            .sum()
+    }
+
     pub fn zero() -> Self {
         VectorN { value: [0; N] }
     }

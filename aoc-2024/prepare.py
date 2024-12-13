@@ -1,6 +1,7 @@
 import requests
 import os
 import sys
+
 # from dotenv import load_dotenv
 from os.path import exists
 from datetime import datetime, time
@@ -12,28 +13,35 @@ year = 2024
 if len(sys.argv) > 1:
     day = sys.argv[1]
 else:
-    print('Enter day:')
+    print("Enter day:")
     day = input()
 
-url = "https://adventofcode.com/{year}/day/{day}/input".format(year = year, day = day)
+url = "https://adventofcode.com/{year}/day/{day}/input".format(year=year, day=day)
 
-example_path = 'examples/day_{}.rs'.format(day.zfill(2))
-input_path = 'input/day_{}.txt'.format(day.zfill(2))
+example_path = "examples/day_{}.rs".format(day.zfill(2))
+input_path = "input/day_{}.txt".format(day.zfill(2))
 
 
 if not exists(example_path):
-    print('created: ' + example_path)
-    file = open(example_path, 'x')
-    rust = '''type InputType = Vec<u32>;
+    print("created: " + example_path)
+    file = open(example_path, "x")
+    rust = """use aoc_2024::stopwatch;
+
+type Input = Vec<u32>;
 
 pub fn main() {
     let numbers = input(include_str!("../input/day_{day}.txt"));
+    // let numbers = input(include_str!("../input/test.txt"));
 
-    // println!("Exercise 1: {}", exercise_1(numbers.clone()));
-    // println!("Exercise 2: {}", exercise_2(numbers));
+    let time = stopwatch(|| {
+        println!("Exercise 1: {}", exercise_1(&numbers));
+        // println!("Exercise 2: {}", exercise_2(&numbers));
+    });
+
+    println!("time: {:?}", time);
 }
 
-fn input(input: &str) -> InputType {
+fn input(input: &str) -> Input {
     input.lines().map(parse_line).collect()
 }
 
@@ -41,12 +49,14 @@ fn parse_line(line: &str) -> usize {
 
 }
 
-fn exercise_1(input: InputType) -> usize {
+fn exercise_1(input: &Input) -> usize {
     unimplemented!()
 }
-fn exercise_2(input: InputType) -> usize {
+fn exercise_2(input: &Input) -> usize {
     unimplemented!()    
-}'''.replace('{day}', day.zfill(2))
+}""".replace(
+        "{day}", day.zfill(2)
+    )
     file.write(rust)
     file.close()
 
@@ -57,7 +67,7 @@ if not exists(input_path):
     # response = requests.get(url = url, cookies=cookies, headers=headers)
 
     # if not response.text.__contains__("Please don't repeatedly request this endpoint before it unlocks! The calendar countdown is synchronized with the server "):
-    print('created:' + input_path)
-    file = open(input_path, 'x')
-    file.write(response.text)
+    print("created:" + input_path)
+    file = open(input_path, "x")
+    # file.write(response.text)
     file.close()
