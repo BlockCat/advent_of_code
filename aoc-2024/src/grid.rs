@@ -176,6 +176,12 @@ where
             .filter_map(|s| self.get_vec(&s).map(|v| (s, v)))
             .collect()
     }
+    pub fn get_neighbours_4(&self, pos: &Vector2) -> Vec<(Vector2, &T)> {
+        pos.neighbours_4()
+            .into_iter()
+            .filter_map(|s| self.get_vec(&s).map(|v| (s, v)))
+            .collect()
+    }
 
     pub fn pretty_print<R>(&self, mapper: R)
     where
