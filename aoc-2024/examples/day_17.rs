@@ -54,8 +54,6 @@ fn help() {
 }
 
 fn exercise_2(input: &Input) -> usize {
-    let program = input.program.clone();
-
     let mut numbers = HashMap::<usize, Vec<usize>>::new();
 
     println!("0..{}", 0b1_111_111_111_111);
@@ -137,7 +135,7 @@ fn exercise_2(input: &Input) -> usize {
                                                                         continue;
                                                                     }
 
-                                                                    let number = a                                                                        
+                                                                    let number = a
                                                                         | d << 9
                                                                         | h << 21
                                                                         | l << 33

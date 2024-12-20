@@ -1,5 +1,4 @@
 use aoc_2024::stopwatch;
-use std::{collections::HashMap, usize};
 
 type Input = CPU;
 
