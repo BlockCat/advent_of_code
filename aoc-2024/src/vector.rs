@@ -44,6 +44,13 @@ impl<const N: usize> VectorN<N> {
     pub fn zero() -> Self {
         VectorN { value: [0; N] }
     }
+
+    pub fn bounded(&self, bounds: [usize; N]) -> bool {
+        self.value
+            .iter()
+            .zip(bounds)
+            .all(|(coord, bound)| coord >= &0 && (*coord as usize) < bound)
+    }
 }
 
 impl Vector2 {
