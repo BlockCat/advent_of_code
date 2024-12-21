@@ -1,29 +1,24 @@
+#![feature(iter_map_windows)]
+
 use aoc_2024::{direction::Direction, stopwatch, vector::Vector2};
 use std::collections::{HashMap, VecDeque};
 
 type Input = Vec<[Button; 4]>;
 
-// too high: 21867034958466832
-// //        205620604017764
-
-const ACTIONS: [RobotInstruction; 5] = [
+const ACTIONS: [RobotInstruction; 4] = [
     RobotInstruction::Move(Direction::North),
     RobotInstruction::Move(Direction::East),
     RobotInstruction::Move(Direction::South),
     RobotInstruction::Move(Direction::West),
-    RobotInstruction::Press,
 ];
 
-// one pad
-// two pad
-// three pad
 pub fn main() {
     let numbers = input(include_str!("../input/day_21.txt"));
     // let numbers = input(include_str!("../input/test.txt")); // ,
 
     let time = stopwatch(|| {
-        println!("Exercise 1: {}", exercise_1::<2>(&numbers));
-        println!("Exercise 2: {}", exercise_1::<25>(&numbers));
+        println!("Exercise 1: {}", exercise_1(2, &numbers));
+        println!("Exercise 2: {}", exercise_1(25, &numbers));
     });
 
     println!("time: {:?}", time);
@@ -34,134 +29,88 @@ fn input(input: &str) -> Input {
 }
 
 fn parse_line(line: &str) -> [Button; 4] {
-    let mut ch = line.chars();
-
-    let a = ch.next().unwrap() as u8 - b'0';
-    let b = ch.next().unwrap() as u8 - b'0';
-    let c = ch.next().unwrap() as u8 - b'0';
+    let mut ch = line.chars().map(|x| x as u8 - b'0').map(Button::Number);
 
     [
-        Button::Number(a),
-        Button::Number(b),
-        Button::Number(c),
+        ch.next().unwrap(),
+        ch.next().unwrap(),
+        ch.next().unwrap(),
         Button::Final,
     ]
 }
 
-fn exercise_1<const S: usize>(input: &Input) -> usize {
+fn exercise_1(robots: u8, input: &Input) -> usize {
     let mut cache = HashMap::new();
 
     input
         .iter()
-        .map(|x| complexity(x, calculate_shortest_path_len(S as u8 + 1, x, &mut cache)))
+        .map(|x| complexity(x, calculate_shortest_path_len(robots + 1, x, &mut cache)))
         .sum()
 }
 
-fn calculate_possible_first_levels(pos: Vector2, target: Vector2) -> Vec<Vec<RobotInstruction>> {
-    find_shortest_path(pos, target, [3, 4], Vector2::new([0, 3]))
-        .into_iter()
-        .map(|mut x| {
-            x.push(RobotInstruction::Press);
-            x
-        })
-        .collect::<Vec<_>>()
-}
-
 fn calculate_shortest_path_len(
-    level: u8,
+    robot: u8,
     numbers: &[Button; 4],
     cache: &mut HashMap<(Vector2, u8, RobotInstruction), usize>,
 ) -> usize {
-    let initial_paths = calculate_possible_first_levels(Vector2::new([2, 3]), numbers[0].to_pos());
+    [Vector2::new([2, 3])]
+        .into_iter()
+        .chain(numbers.iter().map(|x| x.to_pos()))
+        .map_windows(|[source, target]| {
+            fun_name(robot, *source, *target, [3, 4], Vector2::new([0, 3]), cache)
+        })
+        .sum()
+}
 
-    let combi = numbers[1..]
-        .iter()
-        .fold(
-            (initial_paths, numbers[0].to_pos()),
-            |(existing_paths, pos), x| {
-                let shortest_paths = calculate_possible_first_levels(pos, x.to_pos());
-
-                let next_paths = existing_paths
-                    .into_iter()
-                    .flat_map(|p| {
-                        shortest_paths.iter().cloned().map(move |x| {
-                            let mut path = p.clone();
-                            path.append(&mut x.clone());
-                            path
-                        })
-                    })
-                    .collect();
-
-                (next_paths, x.to_pos())
-            },
-        )
-        .0;
-
-    let mut mmm = usize::MAX;
-
-    for c in &combi {
-        mmm = mmm.min(
-            c.into_iter()
+fn fun_name(
+    robot: u8,
+    source: Vector2,
+    target: Vector2,
+    bounds: [usize; 2],
+    gap: Vector2,
+    cache: &mut HashMap<(aoc_2024::vector::VectorN<2>, u8, RobotInstruction), usize>,
+) -> usize {
+    find_shortest_path(robot, source, target, bounds, gap)
+        .into_iter()
+        .map(|x| {
+            x.into_iter()
                 .fold((Vector2::new([2, 0]), 0), |acc, x| {
                     (
                         x.to_pos(),
-                        acc.1 + find_instruction(level - 1, acc.0, *x, cache),
+                        acc.1 + find_instruction(robot - 1, acc.0, x, cache),
                     )
                 })
-                .1,
-        );
-        // println!();
-    }
-
-    // for c in &combi {
-    //     println!("level: {}", level);
-    //     print_path(c);
-    //     println!();
-    // }
-
-    mmm
+                .1
+        })
+        .min()
+        .unwrap()
 }
 
 // to go to and execute instruction on level
 fn find_instruction(
-    level: u8,
+    robot: u8,
     pos: Vector2,
     instruction: RobotInstruction,
     cache: &mut HashMap<(Vector2, u8, RobotInstruction), usize>,
 ) -> usize {
-    if level == 0 {
+    if robot == 0 {
         1
-    } else if let Some(cached) = cache.get(&(pos, level, instruction)) {
+    } else if let Some(cached) = cache.get(&(pos, robot, instruction)) {
         *cached
     } else {
         let source = pos;
         let target = instruction.to_pos();
 
-        let pf1 = find_shortest_path(source, target, [3, 2], Vector2::zero());
+        let sum = fun_name(robot, source, target, [3, 2], Vector2::zero(), cache);
 
-        let sum = pf1
-            .into_iter()
-            .map(|mut path| {
-                path.push(RobotInstruction::Press);
-                path.into_iter()
-                    .fold((Vector2::new([2, 0]), 0), |acc, x| {
-                        (
-                            x.to_pos(),
-                            acc.1 + find_instruction(level - 1, acc.0, x, cache),
-                        )
-                    })
-                    .1
-            })
-            .min()
-            .unwrap();
-
-        cache.insert((pos, level, instruction), sum);
+        cache.insert((pos, robot, instruction), sum);
 
         sum
     }
 }
 
 fn find_shortest_path(
+    robot: u8,
     pos: Vector2,
     target: Vector2,
     bounds: [usize; 2],
@@ -176,11 +125,13 @@ fn find_shortest_path(
 
     while let Some((pos, path)) = queue.pop_front() {
         if pos == target {
+            let mut path = path;
             if path.len() > shortest {
                 return all_shortests;
             }
 
             shortest = shortest.min(path.len());
+            path.push(RobotInstruction::Press);
             all_shortests.push(path);
 
             continue;
@@ -199,7 +150,7 @@ fn find_shortest_path(
                     path.push(action);
                     queue.push_back((np, path));
                 }
-                RobotInstruction::Press => {}
+                _ => unreachable!(),
             }
         }
     }
@@ -208,21 +159,17 @@ fn find_shortest_path(
 }
 
 fn complexity(line: &[Button], instructions: usize) -> usize {
-    let mut com = match line[0] {
-        Button::Number(a) => a as usize,
-        Button::Final => unreachable!(),
-    };
-    com *= 10;
-    com += match line[1] {
-        Button::Number(a) => a as usize,
-        Button::Final => unreachable!(),
-    };
-    com *= 10;
-    com += match line[2] {
-        Button::Number(a) => a as usize,
-        Button::Final => unreachable!(),
-    };
-    instructions * com
+    line.iter()
+        .take(3)
+        .map(|i| {
+            if let Button::Number(b) = i {
+                *b as usize
+            } else {
+                unreachable!()
+            }
+        })
+        .fold(0, |acc, x| acc * 10 + x)
+        * instructions
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -266,7 +213,6 @@ impl RobotInstruction {
             RobotInstruction::Move(Direction::West) => Vector2::new([0, 1]),
             RobotInstruction::Move(Direction::South) => Vector2::new([1, 1]),
             RobotInstruction::Move(Direction::East) => Vector2::new([2, 1]),
-            _ => unreachable!(),
         }
     }
 }

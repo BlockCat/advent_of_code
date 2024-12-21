@@ -1,5 +1,3 @@
-#![feature(slice_group_by)]
-
 use std::str::Lines;
 
 pub mod direction;
@@ -18,7 +16,7 @@ where
     end.duration_since(start)
 }
 
-pub fn grouped_lines<'a>(r: &'a str) -> impl Iterator<Item = Lines> {
+pub fn grouped_lines<'a>(r: &'a str) -> impl Iterator<Item = Lines<'a>> {
     r.split("\n\n").map(|group| group.lines())
 }
 

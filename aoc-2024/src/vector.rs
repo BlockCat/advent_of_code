@@ -49,7 +49,7 @@ impl<const N: usize> VectorN<N> {
         self.value
             .iter()
             .zip(bounds)
-            .all(|(coord, bound)| coord >= &0 && (*coord as usize) < bound)
+            .all(|(coord, bound)| (0..bound as isize).contains(coord))
     }
 }
 
