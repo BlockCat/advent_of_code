@@ -70,18 +70,8 @@ fn fun_name(
     gap: Vector2,
     cache: &mut HashMap<(aoc_2024::vector::VectorN<2>, u8, RobotInstruction), usize>,
 ) -> usize {
-    find_shortest_path(robot, source, target, bounds, gap)
+    find_shortest_path(robot, source, target, bounds, gap, cache)
         .into_iter()
-        .map(|x| {
-            x.into_iter()
-                .fold((Vector2::new([2, 0]), 0), |acc, x| {
-                    (
-                        x.to_pos(),
-                        acc.1 + find_instruction(robot - 1, acc.0, x, cache),
-                    )
-                })
-                .1
-        })
         .min()
         .unwrap()
 }
@@ -111,28 +101,30 @@ fn find_instruction(
 
 fn find_shortest_path(
     robot: u8,
-    pos: Vector2,
+    start_pos: Vector2,
     target: Vector2,
     bounds: [usize; 2],
     gap: Vector2,
-) -> Vec<Vec<RobotInstruction>> {
+    cache: &mut HashMap<(Vector2, u8, RobotInstruction), usize>,
+) -> Vec<usize> {
     let mut queue = VecDeque::new();
-    queue.push_back((pos, vec![]));
+    queue.push_back((start_pos, 0, 0, RobotInstruction::Press));
 
     let mut all_shortests = Vec::new();
 
     let mut shortest = usize::MAX;
 
-    while let Some((pos, path)) = queue.pop_front() {
+    while let Some((pos, score, len, path)) = queue.pop_front() {
         if pos == target {
-            let mut path = path;
-            if path.len() > shortest {
+            if len > shortest {
                 return all_shortests;
             }
 
-            shortest = shortest.min(path.len());
-            path.push(RobotInstruction::Press);
-            all_shortests.push(path);
+            shortest = shortest.min(len);
+            let score =
+                score + find_instruction(robot - 1, path.to_pos(), RobotInstruction::Press, cache);
+
+            all_shortests.push(score);
 
             continue;
         }
@@ -146,9 +138,9 @@ fn find_shortest_path(
                     if !np.bounded(bounds) {
                         continue;
                     }
-                    let mut path = path.clone();
-                    path.push(action);
-                    queue.push_back((np, path));
+                    let score = score + find_instruction(robot - 1, path.to_pos(), action, cache);
+
+                    queue.push_back((np, score, len + 1, action));
                 }
                 _ => unreachable!(),
             }
