@@ -1,5 +1,6 @@
 use std::str::Lines;
 
+pub mod bitset;
 pub mod direction;
 pub mod grid;
 pub mod vector;
