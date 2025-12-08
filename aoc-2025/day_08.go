@@ -22,11 +22,12 @@ func main() {
 	start := time.Now()
 
 	points := loadd8Points(input)
+	distancePairs := DistancePairs(points)
 
 	preprocessTime := time.Now().Sub(start)
 	start = time.Now()
 
-	ex1 := d8ex1(points)
+	ex1 := d8ex1(points, distancePairs)
 
 	ex1elapsed := time.Now().Sub(start)
 
@@ -34,7 +35,7 @@ func main() {
 
 	start = time.Now()
 
-	ex2 := d8ex2(points)
+	ex2 := d8ex2(points, distancePairs)
 
 	ex2elapsed := time.Now().Sub(start)
 
@@ -63,8 +64,8 @@ func loadd8Points(input string) [][3]int {
 
 }
 
-func d8ex1(points [][3]int) int {
-	cluster := d8retrieveCluster(points, 1000)
+func d8ex1(points [][3]int, distancePairs [][3]int) int {
+	cluster := d8retrieveCluster(points, 1000, distancePairs)
 
 	buckets := make([]int, len(points))
 	for _, v := range cluster {
@@ -76,9 +77,9 @@ func d8ex1(points [][3]int) int {
 	return buckets[0] * buckets[1] * buckets[2]
 }
 
-func d8retrieveCluster(points [][3]int, size int) map[int]int {
+func d8retrieveCluster(points [][3]int, size int, distancePairs [][3]int) map[int]int {
 
-	for a, b := range Test(points) {
+	for a, b := range Test(points, distancePairs) {
 		if b[0] == 1000 {
 			return a
 		}
@@ -86,9 +87,9 @@ func d8retrieveCluster(points [][3]int, size int) map[int]int {
 	panic("Unreachable")
 }
 
-func d8ex2(points [][3]int) int {
+func d8ex2(points [][3]int, distancePairs [][3]int) int {
 
-	for a, b := range Test(points) {
+	for a, b := range Test(points, distancePairs) {
 		if len(a) == len(points) {
 			return points[b[1]][0] * points[b[2]][0]
 		}
@@ -103,9 +104,35 @@ func DistSquared(a, b [3]int) int {
 	return da*da + db*db + dc*dc
 }
 
-func Test(points [][3]int) iter.Seq2[map[int]int, [3]int] {
+func DistancePairs(points [][3]int) [][3]int {
 
-	distancePairs := D8CalculateClosestPoints(points)
+	pairs := make(map[[2]int]int)
+
+	for i, a := range points {
+		for j, b := range points[i+1:] {
+			j = i + j + 1
+
+			dist := DistSquared(a, b)
+			pairs[[2]int{i, j}] = dist
+		}
+	}
+
+	distancePairs := make([][3]int, len(pairs)) // p1,p2,dist
+
+	indx := 0
+	for k, v := range pairs {
+		distancePairs[indx] = [3]int{k[0], k[1], v}
+		indx++
+	}
+
+	slices.SortFunc(distancePairs, func(a, b [3]int) int {
+		return cmp.Compare(a[2], b[2])
+	})
+
+	return distancePairs
+}
+
+func Test(points [][3]int, distancePairs [][3]int) iter.Seq2[map[int]int, [3]int] {
 
 	clusters := make(map[int]int)
 
@@ -152,34 +179,9 @@ func Test(points [][3]int) iter.Seq2[map[int]int, [3]int] {
 }
 
 func SmallestPath(cluster map[int]int, start int) int {
-	a, _ := cluster[start]
-	return min(a, start)
-}
-
-// p1,p2,dist
-func D8CalculateClosestPoints(points [][3]int) [][3]int {
-	pairs := make(map[[2]int]int)
-
-	for i, a := range points {
-		for j, b := range points[i+1:] {
-			j = i + j + 1
-
-			dist := DistSquared(a, b)
-			pairs[[2]int{i, j}] = dist
-		}
+	a, h := cluster[start]
+	if h {
+		return a
 	}
-
-	distancePairs := make([][3]int, len(pairs)) // p1,p2,dist
-
-	indx := 0
-	for k, v := range pairs {
-		distancePairs[indx] = [3]int{k[0], k[1], v}
-		indx++
-	}
-
-	slices.SortFunc(distancePairs, func(a, b [3]int) int {
-		return cmp.Compare(a[2], b[2])
-	})
-
-	return distancePairs
+	return start
 }
