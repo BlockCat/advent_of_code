@@ -69,7 +69,7 @@ func d8ex1(points [][3]int, distancePairs [][3]int) int {
 
 	buckets := make([]int, len(points))
 	for _, v := range cluster {
-		buckets[v]++
+		buckets[*v]++
 	}
 	slices.Sort(buckets)
 	slices.Reverse(buckets)
@@ -77,7 +77,7 @@ func d8ex1(points [][3]int, distancePairs [][3]int) int {
 	return buckets[0] * buckets[1] * buckets[2]
 }
 
-func d8retrieveCluster(points [][3]int, size int, distancePairs [][3]int) map[int]int {
+func d8retrieveCluster(points [][3]int, size int, distancePairs [][3]int) map[int]D8Ref {
 
 	for a, b := range Test(points, distancePairs) {
 		if b[0] == 1000 {
@@ -132,13 +132,13 @@ func DistancePairs(points [][3]int) [][3]int {
 	return distancePairs
 }
 
-func Test(points [][3]int, distancePairs [][3]int) iter.Seq2[map[int]int, [3]int] {
+func Test(points [][3]int, distancePairs [][3]int) iter.Seq2[map[int]D8Ref, [3]int] {
 
-	clusters := make(map[int]int)
+	clusters := make(map[int]D8Ref)
 
 	connected := 0
 
-	return func(yield func(a map[int]int, b [3]int) bool) {
+	return func(yield func(a map[int]D8Ref, b [3]int) bool) {
 
 		for _, pair := range distancePairs {
 
@@ -147,28 +147,33 @@ func Test(points [][3]int, distancePairs [][3]int) iter.Seq2[map[int]int, [3]int
 
 			// println("t", connected, ";;", pair[0], pair[1], ") ", mi, ma, "=", min(mi, ma))
 
-			next := min(mi, ma)
-			clusters[pair[0]] = next
-			clusters[pair[1]] = next
+			if *mi < *ma {
+				*ma = *mi
+			} else {
+				*mi = *ma
+			}
+			// next := min(mi, ma)
+			clusters[pair[0]] = mi
+			clusters[pair[1]] = mi
 
 			// fmt.Println(clusters, mi, ma)
+			connected++
+			// if next == mi {
 
-			if next == mi {
-				connected++
-				for k, v := range clusters {
-					if v == ma {
-						clusters[k] = mi
+			for k, v := range clusters {
+				if v == ma {
+					clusters[k] = mi
 
-					}
-				}
-			} else if next == ma {
-				connected++
-				for k, v := range clusters {
-					if v == mi {
-						clusters[k] = ma
-					}
 				}
 			}
+			// } else if next == ma {
+
+			// 	for k, v := range clusters {
+			// 		if v == mi {
+			// 			clusters[k] = ma
+			// 		}
+			// 	}
+			// }
 
 			if !yield(clusters, [3]int{connected, pair[0], pair[1]}) {
 				return
@@ -178,10 +183,12 @@ func Test(points [][3]int, distancePairs [][3]int) iter.Seq2[map[int]int, [3]int
 
 }
 
-func SmallestPath(cluster map[int]int, start int) int {
+func SmallestPath(cluster map[int]D8Ref, start int) D8Ref {
 	a, h := cluster[start]
 	if h {
 		return a
 	}
-	return start
+	return &start
 }
+
+type D8Ref *int
