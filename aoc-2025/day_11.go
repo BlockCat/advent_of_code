@@ -6,7 +6,9 @@ import (
 	"time"
 )
 
-type D11Input []int
+type DeviceOutput []string
+type Device string
+type D11Input map[Device]DeviceOutput
 
 func main() {
 
@@ -45,16 +47,96 @@ func main() {
 }
 
 func d11preprocess(input string) D11Input {
-	lines := strings.Split(input, "\n")
 
-	for i, line := range lines {
+	devices := make(map[Device]DeviceOutput)
+
+	for line := range strings.SplitSeq(input, "\n") {
+		d := strings.Split(line, ": ")
+		device := d[0]
+		outputs := strings.Split(d[1], " ")
+
+		devices[Device(device)] = outputs
 	}
+
+	return devices
 }
 
 func d11ex1(input D11Input) int {
-	return 0
+
+	cache := make(map[string]int)
+
+	return dfs(input, "you", cache)
+}
+
+func dfs(input D11Input, part string, cache map[string]int) int {
+
+	if part == "out" {
+		return 1
+	}
+
+	s, h := cache[part]
+	if h {
+		return s
+	}
+
+	sum := 0
+
+	outputs, _ := input[Device(part)]
+
+	for _, f := range outputs {
+		sum += dfs(input, f, cache)
+	}
+
+	cache[part] = sum
+
+	return sum
+}
+
+func dfs2(input D11Input, part string, cache map[D11Entry]int, dac, fft bool) int {
+
+	if part == "out" && dac && fft {
+		return 1
+	}
+
+	if part == "dac" {
+		dac = true
+	}
+	if part == "fft" {
+		fft = true
+	}
+
+	key := D11Entry{
+		part: part,
+		ftt:  fft,
+		dac:  dac,
+	}
+
+	s, h := cache[key]
+	if h {
+		return s
+	}
+
+	sum := 0
+
+	outputs, _ := input[Device(part)]
+
+	for _, f := range outputs {
+		sum += dfs2(input, f, cache, dac, fft)
+	}
+
+	cache[key] = sum
+
+	return sum
 }
 
 func d11ex2(input D11Input) int {
-	return 0
+	cache := make(map[D11Entry]int)
+
+	return dfs2(input, "svr", cache, false, false)
+}
+
+type D11Entry struct {
+	part string
+	ftt  bool
+	dac  bool
 }
